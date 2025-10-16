@@ -3,82 +3,99 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Models\Article;
+use App\Http\Controllers\AuthController;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "api" middleware group. Make something great!
-|
-*/
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/user', function (Request $request) {
+        return response()->json([
+            'success' => true,
+            'data' => ['user' => $request->user()]
+        ]);
+    });
+    
+    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::post('/logout-all', [AuthController::class, 'logoutAll']);
+    Route::get('/profile', [AuthController::class, 'profile']);
 });
 
-// Articles API Routes
-Route::prefix('articles')->group(function () {
-    // GET /api/articles - Get all articles
+Route::prefix('articles')->middleware('auth:sanctum')->group(function () {
     Route::get('/', function () {
-        return Article::orderBy('created_at', 'desc')->get();
+        return response()->json([
+            'success' => true,
+            'data' => Article::with('user')->orderBy('created_at', 'desc')->get()
+        ]);
     });
     
-    // GET /api/articles/{id} - Get specific article
     Route::get('/{id}', function ($id) {
-        $article = Article::find($id);
-        if (!$article) {
-            return response()->json(['error' => 'Article not found'], 404);
-        }
-        return $article;
+        $article = Article::with('user')->findOrFail($id);
+        return response()->json([
+            'success' => true,
+            'data' => $article
+        ]);
     });
     
-    // POST /api/articles - Create new article
     Route::post('/', function (Request $request) {
-        $request->validate([
+        $validatedData = $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
         ]);
         
         $article = Article::create([
-            'title' => $request->title,
-            'content' => $request->content,
-            'created_at' => now(),
+            'title' => $validatedData['title'],
+            'content' => $validatedData['content'],
+            'user_id' => $request->user()->id,
         ]);
         
-        return response()->json($article, 201);
+        return response()->json([
+            'success' => true,
+            'message' => 'Article created successfully',
+            'data' => $article->load('user')
+        ], 201);
     });
     
-    // PUT /api/articles/{id} - Update article
     Route::put('/{id}', function (Request $request, $id) {
-        $article = Article::find($id);
-        if (!$article) {
-            return response()->json(['error' => 'Article not found'], 404);
+        $article = Article::findOrFail($id);
+        
+        if ($article->user_id !== $request->user()->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You can only update your own articles',
+            ], 403);
         }
         
-        $request->validate([
+        $validatedData = $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
         ]);
         
-        $article->update([
-            'title' => $request->title,
-            'content' => $request->content,
-        ]);
+        $article->update($validatedData);
         
-        return response()->json($article);
+        return response()->json([
+            'success' => true,
+            'message' => 'Article updated successfully',
+            'data' => $article->load('user')
+        ]);
     });
     
-    // DELETE /api/articles/{id} - Delete article
-    Route::delete('/{id}', function ($id) {
-        $article = Article::find($id);
-        if (!$article) {
-            return response()->json(['error' => 'Article not found'], 404);
+    Route::delete('/{id}', function (Request $request, $id) {
+        $article = Article::findOrFail($id);
+        
+        if ($article->user_id !== $request->user()->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You can only delete your own articles',
+            ], 403);
         }
         
         $article->delete();
-        return response()->json(['message' => 'Article deleted successfully']);
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Article deleted successfully'
+        ]);
     });
 });
