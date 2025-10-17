@@ -1,6 +1,7 @@
 # Articles App
 
 A simple full-stack application for managing articles with Laravel backend and React frontend.
+This app lets you create, read, update, and delete articles.
 
 ## Tech Stack
 
@@ -9,9 +10,6 @@ A simple full-stack application for managing articles with Laravel backend and R
 - **Database**: SQLite
 - **Styling**: TailwindCSS
 
-## What This App Does
-
-This app lets you create, read, update, and delete articles. It has a Laravel API backend and a React frontend that talks to the API.
 
 ## Running the App
 
