@@ -28,10 +28,8 @@ const RegisterPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
     setError('');
 
-    try {
       if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
         setError('Please fill in all fields');
         return;
@@ -46,7 +44,9 @@ const RegisterPage = () => {
         setError('Password must be at least 8 characters long');
         return;
       }
-
+    setIsLoading(true);
+    
+    try {
       await register(formData);
       navigate('/');
     } catch (err) {
@@ -84,7 +84,6 @@ const RegisterPage = () => {
                 name="name"
                 type="text"
                 autoComplete="name"
-                required
                 className="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
                 placeholder="Enter your full name"
                 value={formData.name}
@@ -102,7 +101,6 @@ const RegisterPage = () => {
                 name="email"
                 type="email"
                 autoComplete="email"
-                required
                 className="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
                 placeholder="Enter your email"
                 value={formData.email}
@@ -121,7 +119,6 @@ const RegisterPage = () => {
                   name="password"
                   type={showPassword ? "text" : "password"}
                   autoComplete="new-password"
-                  required
                   className="block w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
                   placeholder="Create a password"
                   value={formData.password}
@@ -158,7 +155,6 @@ const RegisterPage = () => {
                   name="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"}
                   autoComplete="new-password"
-                  required
                   className="block w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
                   placeholder="Confirm your password"
                   value={formData.confirmPassword}

@@ -25,15 +25,16 @@ const LoginPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
     setError('');
 
-    try {
-      if (!formData.email || !formData.password) {
-        setError('Please fill in all fields');
-        return;
-      }
+    if (!formData.email || !formData.password) {
+      setError('Please fill in all fields');
+      return;
+    }
 
+    setIsLoading(true);
+
+    try {
       await login(formData);
       navigate('/');
     } catch (err) {
@@ -71,7 +72,6 @@ const LoginPage = () => {
                 name="email"
                 type="email"
                 autoComplete="email"
-                required
                 className="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
                 placeholder="Enter your email"
                 value={formData.email}
@@ -90,7 +90,6 @@ const LoginPage = () => {
                   name="password"
                   type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
-                  required
                   className="block w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
                   placeholder="Enter your password"
                   value={formData.password}
