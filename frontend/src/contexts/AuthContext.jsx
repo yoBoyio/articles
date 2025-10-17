@@ -17,11 +17,22 @@ export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const storedToken = localStorage.getItem('authToken');
-    if (storedToken) {
-      setToken(storedToken);
-    }
-    setIsLoading(false);
+    const initializeAuth = async () => {
+      const storedToken = localStorage.getItem('authToken');
+      if (storedToken) {
+        setToken(storedToken);
+        try {
+          await fetchUserProfile(storedToken);
+        } catch (error) {
+          console.error('Failed to fetch user profile on refresh:', error);
+          localStorage.removeItem('authToken');
+          setToken(null);
+        }
+      }
+      setIsLoading(false);
+    };
+
+    initializeAuth();
   }, []);
 
   const login = async (credentials) => {
@@ -33,11 +44,12 @@ export const AuthProvider = ({ children }) => {
         setToken(authToken);
         localStorage.setItem('authToken', authToken);
         
-        if (response.user) {
-          setUser(response.user);
+        const user = response.data?.user;
+        if (user) {
+          setUser(user);
         }
         
-        return { success: true, user: response.user };
+        return { success: true, user: user };
       } else {
         throw new Error('Something went wrong. No token received from server');
       }
@@ -56,11 +68,12 @@ export const AuthProvider = ({ children }) => {
         setToken(authToken);
         localStorage.setItem('authToken', authToken);
         
-        if (response.user) {
-          setUser(response.user);
+        const user = response.data?.user;
+        if (user) {
+          setUser(user);
         }
         
-        return { success: true, user: response.user };
+        return { success: true, user: user };
       } else {
         throw new Error('Something went wrong. No token received from server');
       }
@@ -87,15 +100,19 @@ export const AuthProvider = ({ children }) => {
   const fetchUserProfile = async (authToken = token) => {
     try {
       if (authToken) {
-        const userData = await apiService.getUserProfile(authToken);
-        setUser(userData);
-        return userData;
+        const response = await apiService.getUserProfile(authToken);
+        const userData = response.data?.user;
+        if (userData) {
+          setUser(userData);
+          return userData;
+        }
       }
     } catch (error) {
       console.error('Failed to fetch user profile:', error);
       if (error.message.includes('401') || error.message.includes('unauthorized')) {
         logout();
       }
+      throw error;
     }
   };
 
