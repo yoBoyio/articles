@@ -84,12 +84,9 @@ class ApiService {
     });
   }
 
-  async getArticles(token) {
+  async getArticles() {
     return this.request('/articles', {
       method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
     });
   }
 
