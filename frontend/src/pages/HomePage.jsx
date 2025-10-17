@@ -2,29 +2,55 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import apiService from '../services/api';
+import SearchAndFilter from '../components/SearchAndFilter';
 
 const HomePage = () => {
   const { token, logout, user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
-  const [articles, setArticles] = useState([]);
+  const [allArticles, setAllArticles] = useState([]);
+  const [filteredArticles, setFilteredArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [filters, setFilters] = useState({
+    search: '',
+    sort: 'desc'
+  });
 
   useEffect(() => {
     fetchArticles();
   }, []);
 
+  useEffect(() => {
+    applyFilters();
+  }, [allArticles, filters]);
+
   const fetchArticles = async () => {
     try {
       setLoading(true);
       const response = await apiService.getArticles();
-      setArticles(response.data);
+      setAllArticles(response.data);
     } catch (err) {
       setError('Failed to fetch articles');
       console.error('Error fetching articles:', err);
     } finally {
       setLoading(false);
     }
+  };
+
+  const applyFilters = () => {
+    let filtered = [...allArticles];
+
+    if (filters.search) {
+      filtered = filtered.filter(article =>
+        article.title.toLowerCase().includes(filters.search.toLowerCase())
+      );
+    }
+    filtered.sort((a, b) => {
+      const dateA = new Date(a.created_at);
+      const dateB = new Date(b.created_at);
+      return filters.sort === 'asc' ? dateA - dateB : dateB - dateA;
+    });
+    setFilteredArticles(filtered);
   };
 
   const handleLogout = () => {
@@ -44,12 +70,20 @@ const HomePage = () => {
     if (window.confirm('Are you sure you want to delete this article?')) {
       try {
         await apiService.deleteArticle(articleId, token);
-        setArticles(articles.filter(article => article.id !== articleId));
+        setAllArticles(allArticles.filter(article => article.id !== articleId));
       } catch (err) {
         setError('Failed to delete article');
         console.error('Error deleting article:', err);
       }
     }
+  };
+
+  const handleSearch = (searchTerm) => {
+    setFilters(prev => ({ ...prev, search: searchTerm }));
+  };
+
+  const handleSort = (sortOrder) => {
+    setFilters(prev => ({ ...prev, sort: sortOrder }));
   };
 
   const formatDate = (dateString) => {
@@ -150,14 +184,22 @@ const HomePage = () => {
             </div>
           )}
 
+          <SearchAndFilter
+            onSearch={handleSearch}
+            onSort={handleSort}
+            filters={filters}
+            loading={loading}
+          />
+
           <div className="bg-white shadow-xl rounded-2xl border border-gray-100 backdrop-blur-sm bg-white/95">
             <div className="px-8 py-6 border-b border-gray-200">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900">All Articles</h2>
-                  <p className="text-gray-600 mt-1">{articles.length} article{articles.length !== 1 ? 's' : ''} found</p>
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    {filters.search ? 'Search Results' : 'All Articles'}
+                  </h2>
                 </div>
-                {articles.length > 0 && (
+                {filteredArticles.length > 0 && (
                   <div className="hidden sm:flex items-center text-sm text-gray-500">
                     <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -168,18 +210,22 @@ const HomePage = () => {
               </div>
             </div>
             
-            {articles.length === 0 ? (
+            {filteredArticles.length === 0 ? (
               <div className="px-8 py-16 text-center">
                 <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
                   <svg className="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">No articles yet</h3>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  {filters.search ? 'No articles found' : 'No articles yet'}
+                </h3>
                 <p className="text-gray-500 mb-8 max-w-sm mx-auto">
-                  {isAuthenticated() 
-                    ? 'Start your writing journey by creating your first article. Share your thoughts and ideas with the world.'
-                    : 'No articles have been published yet. Check back later for new content!'
+                  {filters.search
+                    ? 'Better luck next time.'
+                    : isAuthenticated() 
+                      ? 'Share your thoughts and ideas with the world.'
+                      : 'No articles have been published yet. Check back later for new content!'
                   }
                 </p>
                 {isAuthenticated() && (
@@ -196,7 +242,7 @@ const HomePage = () => {
               </div>
             ) : (
               <div className="divide-y divide-gray-100">
-                {articles.map((article, index) => (
+                {filteredArticles.map((article, index) => (
                   <div 
                     key={article.id} 
                     className="px-8 py-6 hover:bg-gray-50 transition-all duration-200 group animate-in slide-in-from-bottom-2"
