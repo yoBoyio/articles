@@ -74,13 +74,6 @@ class AuthController extends Controller
         ]);
     }
 
-    public function profile(Request $request)
-    {
-        return response()->json([
-            'success' => true,
-            'data' => ['user' => $request->user()]
-        ]);
-    }
 
     public function logoutAll(Request $request)
     {

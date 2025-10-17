@@ -18,18 +18,17 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     
     Route::post('/logout', [AuthController::class, 'logout']);
-    Route::post('/logout-all', [AuthController::class, 'logoutAll']);
-    Route::get('/profile', [AuthController::class, 'profile']);
+});
+
+
+Route::get('/articles', function () {
+    return response()->json([
+        'success' => true,
+        'data' => Article::with('user')->orderBy('created_at', 'desc')->get()
+    ]);
 });
 
 Route::prefix('articles')->middleware('auth:sanctum')->group(function () {
-    Route::get('/', function () {
-        return response()->json([
-            'success' => true,
-            'data' => Article::with('user')->orderBy('created_at', 'desc')->get()
-        ]);
-    });
-    
     Route::get('/{id}', function ($id) {
         $article = Article::with('user')->findOrFail($id);
         return response()->json([
