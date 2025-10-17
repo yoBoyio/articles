@@ -83,6 +83,53 @@ class ApiService {
       },
     });
   }
+
+  async getArticles(token) {
+    return this.request('/articles', {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+  }
+
+  async getArticle(id, token) {
+    return this.request(`/articles/${id}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+  }
+
+  async createArticle(articleData, token) {
+    return this.request('/articles', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+      data: articleData,
+    });
+  }
+
+  async updateArticle(id, articleData, token) {
+    return this.request(`/articles/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+      data: articleData,
+    });
+  }
+
+  async deleteArticle(id, token) {
+    return this.request(`/articles/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+  }
 }
 
 export default new ApiService();
