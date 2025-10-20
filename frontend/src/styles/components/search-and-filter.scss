@@ -1,0 +1,47 @@
+.search-filter {
+  @apply bg-white shadow-lg rounded-2xl border border-gray-100 p-6 mb-6;
+
+  &__header {
+    @apply flex items-center justify-between mb-6;
+  }
+
+  &__title {
+    @apply text-xl font-bold text-gray-900;
+  }
+
+  &__content {
+    @apply flex flex-col sm:flex-row gap-4;
+  }
+
+  &__search {
+    @apply flex-1;
+
+    &-form {
+      @apply relative;
+    }
+
+    &-container {
+      @apply relative;
+    }
+
+    &-icon {
+      @apply absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none;
+    }
+
+    &-input {
+      @apply block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200;
+    }
+  }
+
+  &__sort {
+    @apply flex items-center gap-2;
+
+    &-label {
+      @apply text-sm font-medium text-gray-700 whitespace-nowrap;
+    }
+
+    &-select {
+      @apply px-3 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-[140px];
+    }
+  }
+}

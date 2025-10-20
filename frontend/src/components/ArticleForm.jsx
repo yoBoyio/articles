@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import apiService from '../services/api';
+import '../styles/components/article-form.scss';
 
 const ArticleForm = () => {
   const { token } = useAuth();
@@ -101,47 +102,47 @@ const ArticleForm = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading article...</p>
+      <div className="article-form__loading">
+        <div className="article-form__loading-container">
+          <div className="article-form__loading-spinner"></div>
+          <p className="article-form__loading-text">Loading article...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-      <div className="max-w-4xl mx-auto py-8 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          <div className="bg-white shadow-xl rounded-xl border border-gray-100 p-8">
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-900">
+    <div className="article-form">
+      <div className="article-form__container">
+        <div className="article-form__content">
+          <div className="article-form__card">
+            <div className="article-form__header">
+              <h1 className="article-form__title">
                 {isEdit ? 'Edit Article' : 'Create New Article'}
               </h1>
-              <p className="text-gray-600 mt-1">
+              <p className="article-form__subtitle">
                 {isEdit ? 'Update your article details below' : 'Fill in the details to create a new article'}
               </p>
             </div>
 
             {errors.submit && (
-              <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+              <div className="article-form__error">
                 <div className="flex">
-                  <div className="flex-shrink-0">
+                  <div className="article-form__error-icon">
                     <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                     </svg>
                   </div>
-                  <div className="ml-3">
-                    <p className="text-sm text-red-800">{errors.submit}</p>
+                  <div className="article-form__error-content">
+                    <p className="article-form__error-text">{errors.submit}</p>
                   </div>
                 </div>
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
+            <form onSubmit={handleSubmit} className="article-form__form">
+              <div className="article-form__field">
+                <label htmlFor="title" className="article-form__field-label">
                   Title *
                 </label>
                 <input
@@ -150,22 +151,22 @@ const ArticleForm = () => {
                   name="title"
                   value={formData.title}
                   onChange={handleInputChange}
-                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-                    errors.title ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                  className={`article-form__field-input ${
+                    errors.title ? 'article-form__field-input--error' : 'article-form__field-input--normal'
                   }`}
                   placeholder="Enter article title"
                   maxLength={255}
                 />
                 {errors.title && (
-                  <p className="mt-1 text-sm text-red-600">{errors.title}</p>
+                  <p className="article-form__field-error">{errors.title}</p>
                 )}
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="article-form__field-counter">
                   {formData.title.length}/255 characters
                 </p>
               </div>
 
-              <div>
-                <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-2">
+              <div className="article-form__field">
+                <label htmlFor="content" className="article-form__field-label">
                   Content *
                 </label>
                 <textarea
@@ -174,21 +175,21 @@ const ArticleForm = () => {
                   rows={12}
                   value={formData.content}
                   onChange={handleInputChange}
-                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-vertical ${
-                    errors.content ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                  className={`article-form__field-textarea ${
+                    errors.content ? 'article-form__field-textarea--error' : 'article-form__field-textarea--normal'
                   }`}
                   placeholder="Write your article content here..."
                 />
                 {errors.content && (
-                  <p className="mt-1 text-sm text-red-600">{errors.content}</p>
+                  <p className="article-form__field-error">{errors.content}</p>
                 )}
               </div>
 
-              <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+              <div className="article-form__actions">
                 <button
                   type="button"
                   onClick={handleCancel}
-                  className="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors font-medium"
+                  className="article-form__button article-form__button--cancel"
                   disabled={loading}
                 >
                   Cancel
@@ -196,11 +197,11 @@ const ArticleForm = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg font-medium transition-colors shadow-lg hover:shadow-xl disabled:shadow-none"
+                  className="article-form__button article-form__button--submit"
                 >
                   {loading ? (
-                    <div className="flex items-center">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    <div className="article-form__button-content">
+                      <div className="article-form__button-spinner"></div>
                       {isEdit ? 'Updating...' : 'Creating...'}
                     </div>
                   ) : (
